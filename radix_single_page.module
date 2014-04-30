@@ -1,0 +1,94 @@
+<?php
+/**
+ * @file
+ * Code for the Radix Single Page feature.
+ */
+
+include_once 'radix_single_page.features.inc';
+
+/**
+ * Implements hook_preprocess().
+ */
+function radix_single_page_preprocess_entity(&$variables) {
+  $bundle = $variables['elements']['#bundle'];
+  if ($bundle == 'field_single_page_pages') {
+    $page = $variables['elements']['#entity'];
+    $anchor_name = _radix_single_page_create_anchor_name_for_page($page);
+    $anchor['anchor'] = array(
+      '#markup' => '<a name="' . $anchor_name . '" id="' . $anchor_name . '"></a>',
+      '#weight' => -1000,
+    );
+    $variables['content'] = $anchor + $variables['content'];
+  }
+}
+
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function radix_single_page_preprocess_page(&$variables) {
+  $front_page = variable_get('site_frontpage', '');
+  if (preg_match("/^node\/([\d]*)$/", $front_page, $matches)) {
+    $nid = $matches[1];
+    $node = node_load($nid);
+    // If node is a single page build the single page menu.
+    if ($node && $node->type == 'single_page') {      
+      $pages = entity_metadata_wrapper('node', $node)->field_single_page_pages->value();
+      if ($pages) {
+        $path = drupal_get_path('module', 'radix_single_page');
+
+        // Create a custom menu to hold single page menu items.
+        $variables['single_page_menu'] = array();
+        $variables['single_page_menu']['#theme_wrappers'][] = 'menu_tree__navbar_nav';
+
+        // Create a menu item for each page.
+        foreach ($pages as $page) {
+          if ($menu_item = _radix_single_page_create_page_menu_item($page)) {
+            $variables['single_page_menu'][] = $menu_item;
+          }
+        }
+
+        drupal_add_js($path . '/js/jquery.smooth-scroll.min.js');
+        drupal_add_js($path . '/js/radix_single_page.js');
+      }
+    }
+  }
+}
+
+/**
+ * Create a menu item from a field collection entity.
+ *
+ * @param $entity.
+ *  The field collection entity.
+ */
+function _radix_single_page_create_page_menu_item($entity) {
+  $menu_title = entity_metadata_wrapper('field_collection_item', $entity)->field_single_page_menu_title->value();
+  $anchor_name = _radix_single_page_create_anchor_name_for_page($entity);
+  $front_page = variable_get('site_frontpage', '');
+
+  if ($menu_title && $anchor_name) {
+    return array(
+      '#theme' => 'menu_link__main_menu',
+      '#attributes' => array('class' => array()),
+      '#title' => $menu_title,
+      '#href' => drupal_is_front_page() ? '' : $front_page,
+      '#localized_options' => array(
+        'fragment' => $anchor_name,
+        'attributes' => array('class' => array('single-page-link')),
+      ),
+    );
+  }
+
+  return FALSE;
+}
+
+/**
+ * Creates an anchor name for a single page entity.
+ *
+ * @param $entity.
+ *  The field collection entity.
+ */
+function _radix_single_page_create_anchor_name_for_page($entity) {
+  $menu_title = entity_metadata_wrapper('field_collection_item', $entity)->field_single_page_menu_title->value();
+  return (!empty($menu_title)) ? drupal_html_class($menu_title) : '';
+}
