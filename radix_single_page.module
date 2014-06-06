@@ -39,7 +39,7 @@ function radix_single_page_preprocess_page(&$variables) {
 
         // Create a custom menu to hold single page menu items.
         $variables['single_page_menu'] = array();
-        $variables['single_page_menu']['#theme_wrappers'][] = 'menu_tree__navbar_nav';
+        $variables['single_page_menu']['#theme_wrappers'] = array();
 
         // Add a home link.
 //        $variables['single_page_menu'][] = array(
@@ -57,6 +57,7 @@ function radix_single_page_preprocess_page(&$variables) {
           }
         }
 
+        // Add javascript for smooth scrolling.
         drupal_add_js($path . '/js/jquery.smooth-scroll.min.js');
         drupal_add_js($path . '/js/radix_single_page.js');
       }
