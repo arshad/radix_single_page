@@ -42,13 +42,13 @@ function radix_single_page_preprocess_page(&$variables) {
         $variables['single_page_menu']['#theme_wrappers'][] = 'menu_tree__navbar_nav';
 
         // Add a home link.
-        $variables['single_page_menu'][] = array(
-          '#theme' => 'menu_link__main_menu',
-          '#attributes' => array('class' => array()),
-          '#title' => t('Home'),
-          '#href' => $front_page,
-          '#localized_options' => array(),
-        );
+//        $variables['single_page_menu'][] = array(
+//          '#theme' => 'menu_link__main_menu',
+//          '#attributes' => array('class' => array()),
+//          '#title' => t('Home'),
+//          '#href' => $front_page,
+//          '#localized_options' => array(),
+//        );
 
         // Create a menu item for each page.
         foreach ($pages as $page) {
